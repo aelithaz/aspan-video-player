@@ -1,71 +1,38 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/survey_video', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+require("dotenv").config();
+const MONGO_URI = process.env.MONGODB_URI;
 
-// Schema for tracking video chunks viewed by users
-const ChunkViewSchema = new mongoose.Schema({
+// Define schema and model
+const chunkSchema = new mongoose.Schema({
     userId: String,
-    videoId: String,
-    chunkNumber: Number,
-    viewCount: { type: Number, default: 0 }
+    video: String,
+    chunkViews: Object,
+    timestamp: Date
 });
 
-// Model
-const ChunkView = mongoose.model('ChunkView', ChunkViewSchema);
+const ChunkView = mongoose.model("ChunkView", chunkSchema);
 
-// Endpoint to record chunk views
-app.post('/record-view', async (req, res) => {
-    const { userId, videoId, chunkNumber } = req.body;
-
-    if (!userId || !videoId || chunkNumber === undefined) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-
+// Route to receive chunk data
+app.post("/api/save-chunks", async (req, res) => {
     try {
-        // Find existing record or create new one
-        const chunk = await ChunkView.findOneAndUpdate(
-            { userId, videoId, chunkNumber },
-            { $inc: { viewCount: 1 } },
-            { upsert: true, new: true }
-        );
-        res.json({ success: true, data: chunk });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        const newEntry = new ChunkView(req.body);
+        await newEntry.save();
+        res.status(200).send("Chunk views saved.");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error saving data.");
     }
 });
 
-// Endpoint to get total chunk views across all users for a video
-app.get('/analytics/:videoId', async (req, res) => {
-    const { videoId } = req.params;
-
-    try {
-        const chunkViews = await ChunkView.aggregate([
-            { $match: { videoId } },
-            {
-                $group: {
-                    _id: "$chunkNumber",
-                    totalViews: { $sum: "$viewCount" }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ]);
-
-        res.json({ videoId, chunkViews });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
-
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
