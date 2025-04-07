@@ -1,25 +1,35 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
+require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-require("dotenv").config();
-const MONGO_URI = process.env.MONGODB_URI;
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log("✅ Connected to MongoDB Atlas"))
+    .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// Define schema and model
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, "public")));
+
+// Default route (for browser)
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// API endpoint
 const chunkSchema = new mongoose.Schema({
     userId: String,
     video: String,
     chunkViews: Object,
     timestamp: Date
 });
-
 const ChunkView = mongoose.model("ChunkView", chunkSchema);
 
-// Route to receive chunk data
 app.post("/api/save-chunks", async (req, res) => {
     try {
         const newEntry = new ChunkView(req.body);
