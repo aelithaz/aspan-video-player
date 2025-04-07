@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Default route (for browser)
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "aspan-video-player.html"));
 });
 
 // API endpoint
