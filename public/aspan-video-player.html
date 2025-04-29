@@ -148,24 +148,15 @@
         }
 
         function submitDataToServer() {
-            fetch("https://aspan-video-player.onrender.com/api/save-chunks", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    userId: generateUserId(),
-                    video: currentVideo,
-                    chunkViews: chunkViews[currentVideo],
-                    timestamp: new Date().toISOString()
-                })
-            }).then(response => {
-                if (response.ok) {
-                    alert("Data submitted successfully.");
-                } else {
-                    alert("Failed to submit data.");
-                }
-            });
+            const payload = {
+                userId: generateUserId(), // Replace with real UID from Qualtrics later
+                video: currentVideo,
+                chunkViews: chunkViews[currentVideo],
+                timestamp: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            navigator.sendBeacon("https://aspan-video-player.onrender.com/api/save-chunks", blob);
         }
 
         function playVideo() { 
