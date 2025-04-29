@@ -147,9 +147,11 @@
             initializeTracking();
         }
 
+        const uid = generateUserId();  // Call only ONCE at the start
+
         function submitDataToServer() {
             const payload = {
-                userId: generateUserId(), // Replace with real UID from Qualtrics later
+                userId: uid,
                 video: currentVideo,
                 chunkViews: chunkViews[currentVideo],
                 timestamp: new Date().toISOString()
@@ -157,7 +159,8 @@
 
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
             console.log("🔔 Sending beacon with payload:", payload);
-            navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
+            const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
+            console.log("📤 Beacon success:", success);
         }
 
         function playVideo() { 
