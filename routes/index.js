@@ -7,6 +7,6 @@ router.get('/', (req, res) => {
     res.send('Welcome to ASPAN Video Player Backend!');
 });
 
-router.post('/api/view', recordView);
+router.post('/view', recordView);
 
 module.exports = router;

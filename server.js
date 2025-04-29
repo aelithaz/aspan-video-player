@@ -13,6 +13,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/aspan_vid
 // 🔵 Serve static files from public/ folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 🔵 Ensures the payload from navigator.sendBeacon() is parsed even if it's raw JSON
+app.use(express.text({ type: 'application/json' }));
+
 // 🔵 API routes
 app.use('/api', routes);
 

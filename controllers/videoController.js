@@ -1,6 +1,9 @@
 const UserView = require('../models/userViewModel');
 
 exports.recordView = async (req, res) => {
+    console.log("✅ Received POST /api/view");
+    console.log("📦 Payload:", req.body);
+
     try {
         const { uid = "dummy-uid-12345", videoId, chunkIndex } = req.body;
 
