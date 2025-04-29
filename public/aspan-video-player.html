@@ -156,7 +156,8 @@
             };
 
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            navigator.sendBeacon("https://aspan-video-player.onrender.com/api/save-chunks", blob);
+            console.log("🔔 Sending beacon with payload:", payload);
+            navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
         }
 
         function playVideo() { 
