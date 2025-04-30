@@ -145,6 +145,8 @@
             videoSource.src = "videos/" + currentVideo;
             video.load();
             lastChunk = -1; // Reset chunk tracking
+            video.currentTime = 0;
+            progressBar.style.width = "0%"; 
             initializeTracking();
         }
 
@@ -160,17 +162,25 @@
         const uid = generateUserId();  // Call only ONCE at the start
 
         function submitDataToServer() {
-            const payload = {
-                userId: uid,
-                video: currentVideo,
-                chunkViews: chunkViews[currentVideo],
-                timestamp: new Date().toISOString()
-            };
+            for (const video in chunkViews) {
+                const videoChunks = chunkViews[video];
 
-            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            console.log("🔔 Sending beacon with payload:", payload);
-            const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
-            console.log("📤 Beacon success:", success);
+                // Only send if any chunks have a count > 0
+                const hasViews = Object.values(videoChunks).some(count => count > 0);
+                if (!hasViews) continue;
+
+                const payload = {
+                    userId: uid,
+                    video: video,
+                    chunkViews: videoChunks,
+                    timestamp: new Date().toISOString()
+                };
+
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                console.log("🔔 Sending beacon with payload:", payload);
+                const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
+                console.log("📤 Beacon success:", success);
+            }
         }
 
         function playVideo() {

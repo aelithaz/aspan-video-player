@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 🔵 Debug
 app.use((req, res, next) => {
     console.log(`📥 ${req.method} ${req.originalUrl}`);
-    console.log("Headers:", req.headers);
+    //console.log("Headers:", req.headers);
     console.log("Body:", req.body);
     next();
   });
