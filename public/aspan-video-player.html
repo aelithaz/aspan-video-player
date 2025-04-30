@@ -250,7 +250,7 @@
         //     }
         // };
 
-        document.addEventListener("pagehide", () => {
+        window.addEventListener("pagehide", () => {
             if (!dataAlreadySent) {
                 submitDataToServer();
                 dataAlreadySent = true;
