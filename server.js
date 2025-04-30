@@ -7,10 +7,7 @@ const routes = require('./routes');
 
 // 🔵 MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/aspan_video')
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    console.log('🧠 Using database:', mongoose.connection.name);  // ← add this!
-  })
+  .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // 🔵 Enable CORS (important if frontend served from a different origin)
