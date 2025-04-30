@@ -1,9 +1,6 @@
 const UserView = require('../models/userViewModel');
 const mongoose = require('mongoose');
 
-const UserView = require('../models/userViewModel');
-const mongoose = require('mongoose');
-
 const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
