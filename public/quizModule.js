@@ -126,34 +126,40 @@ export const quizzes = {
  * @param {object} quizAnswers - The object to store selected answers
  * @param {function} onSelect - The handler to call when an answer is selected
  */
-export function renderQuiz(videoName, container, quizAnswers, onSelect) {
+export function renderQuiz(videoName, container, quizAnswers, handleAnswer) {
+    container.innerHTML = ""; // Clear previous
+
     const quiz = quizzes[videoName];
     if (!quiz) return;
-  
-    container.innerHTML = ""; // Clear previous
-  
+
+    quizAnswers[videoName] = quizAnswers[videoName] || [];
+
     quiz.forEach((q, idx) => {
-      const div = document.createElement("div");
-      div.innerHTML = `<p><strong>Q${idx + 1}: ${q.question}</strong></p>` +
-        q.options.map((opt, i) => `
-          <label>
-            <input type="radio" name="q${videoName}-q${idx}" value="${i}">
-            ${opt}
-          </label><br>
-        `).join("");
-  
-      div.querySelectorAll("input").forEach(input => {
-        input.addEventListener("change", () => {
-          quizAnswers[videoName] = quizAnswers[videoName] || [];
-          quizAnswers[videoName][idx] = {
-            selectedIndex: parseInt(input.value),
-            selectedText: q.options[input.value]
-          };
-          onSelect(videoName, idx, parseInt(input.value));
+        const div = document.createElement("div");
+        div.className = "quiz-question";
+
+        const questionP = document.createElement("p");
+        questionP.innerHTML = `<strong>Q${idx + 1}: ${q.question}</strong>`;
+        div.appendChild(questionP);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "quiz-options";
+
+        q.options.forEach((opt, i) => {
+            const label = document.createElement("label");
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = `q${idx}`;
+            input.value = i;
+            input.checked = quizAnswers[videoName][idx]?.selectedIndex === i;
+            input.onchange = () => handleAnswer(videoName, idx, i);
+            label.appendChild(input);
+            label.append(` ${opt}`);
+            optionsDiv.appendChild(label);
         });
-      });
-  
-      container.appendChild(div);
+
+        div.appendChild(optionsDiv);
+        container.appendChild(div);
     });
 }
 
