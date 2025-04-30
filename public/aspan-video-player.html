@@ -108,6 +108,7 @@
         let lastChunk = -1; // Tracks last recorded chunk
         let currentVideo = "wealthReport.mp4"; // Default video
         let manualSeek = false; // Tracks manual seeking
+        let seekWhilePaused = false; // Checks if seeking is done while paused
 
         function initializeTracking() {
             video.onloadedmetadata = () => {
@@ -172,7 +173,18 @@
             console.log("📤 Beacon success:", success);
         }
 
-        function playVideo() { 
+        function playVideo() {
+            if (video.currentTime >= video.duration) {
+                lastChunk = -1;
+            }
+
+            if (seekWhilePaused) {
+                setTimeout(() => {
+                    trackChunkViews();     
+                    seekWhilePaused = false;
+                }, 100);
+            }
+
             video.play();
             manualSeek = false;
         }
@@ -181,6 +193,9 @@
 
         function rewind(seconds) {
             video.currentTime = Math.max(video.currentTime - seconds, 0);
+            setTimeout(() => {
+                trackChunkViews();  // update new chunk after seeking
+            }, 100);
         }
 
         function changeSpeed() {
@@ -204,12 +219,14 @@
             const newTime = (clickX / rect.width) * video.duration;
             video.currentTime = newTime;
             manualSeek = true;
-            if (!video.paused) {
-                // Wait until currentTime has updated
+
+            if (video.paused) {
+                seekWhilePaused = true;  
+            } else {
                 setTimeout(() => {
                     trackChunkViews();
                     manualSeek = false;
-                }, 100); // slight delay to ensure currentTime reflects the new position
+                }, 100);
             }
         }
 
