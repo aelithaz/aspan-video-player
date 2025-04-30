@@ -1,4 +1,8 @@
 const UserView = require('../models/userViewModel');
+const mongoose = require('mongoose');
+
+const UserView = require('../models/userViewModel');
+const mongoose = require('mongoose');
 
 const recordView = async (req, res) => {
   try {
@@ -11,11 +15,15 @@ const recordView = async (req, res) => {
       return res.status(400).send("Invalid request body");
     }
 
+    // Convert chunkViews into an object of viewed chunk counts
     const chunks = Object.entries(chunkViews)
       .filter(([_, count]) => count > 0)
-      .map(([chunk]) => parseInt(chunk));
+      .reduce((acc, [chunk, count]) => {
+        acc[chunk] = count;
+        return acc;
+      }, {});
 
-    if (chunks.length === 0) {
+    if (Object.keys(chunks).length === 0) {
       console.log("⚠️ No chunks viewed — skipping DB update");
       return res.status(204).send("No meaningful data to record");
     }
@@ -34,9 +42,11 @@ const recordView = async (req, res) => {
       const existingView = user.views.find(v => v.videoId === video);
 
       if (existingView) {
-        // Merge and deduplicate chunk indices
-        const mergedChunks = Array.from(new Set([...existingView.chunksViewed, ...chunks])).sort((a, b) => a - b);
-        existingView.chunksViewed = mergedChunks;
+        // Merge and accumulate chunk view counts
+        for (const [chunk, count] of Object.entries(chunks)) {
+          const prevCount = existingView.chunksViewed.get(chunk) || 0;
+          existingView.chunksViewed.set(chunk, prevCount + count);
+        }
       } else {
         // Append new view entry for this video
         user.views.push({ videoId: video, chunksViewed: chunks });
