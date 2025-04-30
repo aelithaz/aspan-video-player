@@ -5,7 +5,7 @@ const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
 
-    const { userId: uid, video, chunkViews } = req.body;
+    const { userId: uid, video, chunkViews, correctAnswers } = req.body;
 
     if (!uid || !video || typeof chunkViews !== 'object') {
       console.warn("⚠️ Invalid payload:", { uid, video, chunkViews });
@@ -32,7 +32,7 @@ const recordView = async (req, res) => {
       // New user, create a new entry
       user = await UserView.create({
         uid,
-        views: [{ videoId: video, chunksViewed: chunks }]
+        views: [{ videoId: video, chunksViewed: chunks, correctAnswers: correctAnswers || 0 }]
       });
     } else {
       // User exists, check if they already watched this video
@@ -44,9 +44,13 @@ const recordView = async (req, res) => {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
           existingView.chunksViewed.set(chunk, prevCount + count);
         }
+        // Update correctAnswers
+        if (typeof correctAnswers === 'number') {
+          existingView.correctAnswers = correctAnswers;
+        }
       } else {
         // Append new view entry for this video
-        user.views.push({ videoId: video, chunksViewed: chunks });
+        user.views.push({ videoId: video, chunksViewed: chunks, correctAnswers: correctAnswers || 0 });
       }
 
       await user.save();

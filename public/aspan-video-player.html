@@ -69,7 +69,7 @@
     <label for="videoSelector">Select Video:</label>
     <select id="videoSelector" onchange="changeVideo()">
         <option value="wealthReport.mp4">Wealth Report</option>
-        <option value="sustainability.mp4">Sustainable Development</option>
+        <option value="genderEquality.mp4">Gender Equality</option>
         <option value="branding.mp4">Branding</option>
     </select>
 
@@ -88,13 +88,18 @@
         <button onclick="pauseVideo()">⏸ Pause</button>
         <button onclick="rewind(10)">⏪ Rewind 10s</button>
         <label for="speedSelector">Playback Speed:</label>
-        <select id="speedSelector" onchange="changeSpeed()">
+        <label for="volumeSlider">Volume:</label>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        <!-- Handles changing video speed -->
+        <!-- <select id="speedSelector" onchange="changeSpeed()">
             <option value="1">1x</option>
             <option value="1.25">1.25x</option>
             <option value="1.5">1.5x</option>
             <option value="2">2x</option>
-        </select>
+        </select> -->
     </div>
+
+    <div id="quizContainer"></div>
 
     <script>
         const video = document.getElementById("surveyVideo");
@@ -148,6 +153,7 @@
             video.currentTime = 0;
             progressBar.style.width = "0%"; 
             initializeTracking();
+            renderQuiz(currentVideo);
         }
 
         function generateUserId() {
@@ -162,18 +168,31 @@
         const uid = generateUserId();  // Call only ONCE at the start
 
         function submitDataToServer() {
-            for (const video in chunkViews) {
+            const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
+
+            for (const video in orderedVideos) {
                 const videoChunks = chunkViews[video];
 
                 // Only send if any chunks have a count > 0
                 const hasViews = Object.values(videoChunks).some(count => count > 0);
                 if (!hasViews) continue;
 
+                const correctAnswers = quizAnswers[video]?.filter((entry, i) =>
+                    entry?.selectedIndex === quizzes[video][i].correct
+                ).length || 0;
+
+                const selectedAnswers = quizAnswers[video]?.map((entry, i) => ({
+                    question: quizzes[video][i].question,
+                    selected: entry?.selectedText || null
+                })) || [];
+
                 const payload = {
                     userId: uid,
                     video: video,
                     chunkViews: videoChunks,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    quizCorrect: correctAnswers,
+                    selectedAnswers: selectedAnswers
                 };
 
                 const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
@@ -208,10 +227,11 @@
             }, 100);
         }
 
-        function changeSpeed() {
-            const speedSelector = document.getElementById("speedSelector");
-            video.playbackRate = parseFloat(speedSelector.value);
-        }
+        // Handles changing video speed
+        // function changeSpeed() {
+        //     const speedSelector = document.getElementById("speedSelector");
+        //     video.playbackRate = parseFloat(speedSelector.value);
+        // }
 
         function createChunkMarkers(numChunks) {
             chunkMarkers.innerHTML = "";
@@ -249,6 +269,164 @@
         //         dataAlreadySent = true;
         //     }
         // };
+
+        document.getElementById("volumeSlider").addEventListener("input", function () {
+            video.volume = parseFloat(this.value);
+        });
+
+        const quizzes = {
+            "wealthReport.mp4": [
+                {
+                    question: "Which of these inferences can be made from the video?",
+                    options: [
+                        "2022 resulted in a real wealth loss and real estate may weaken if housing prices drop",
+                        "2022 resulted in a real wealth loss and real estate may become stronger if housing prices drop",
+                        "2022 resulted in a real wealth gain and real estate may weaken if housing prices drop",
+                        "2022 resulted in a real wealth gain and real estate may become stronger if housing prices drop"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "About how much was the drop in global household wealth, as reported by the 2023 Credit Suisse Global Wealth Report?",
+                    options: ["1 trillion", "5 trillion", "10 trillion", "20 trillion"],
+                    correct: 2
+                },
+                {
+                    question: "Which of these options matches regional wealth trends shown in the video?",
+                    options: [
+                        "Gains in North America and Latin America and losses in Europe",
+                        "Gains in North America and Europe and losses in Latin America",
+                        "Gains in Europe and losses in North America and Latin America",
+                        "Gains in Latin America and Losses in North America and Europe"
+                    ],
+                    correct: 3
+                },
+                {
+                    question: "Which of these options matches the information mentioned in the video?",
+                    options: [
+                        "The top 1%’s wealth share dropped as did the number of millionaires; median global wealth grew",
+                        "The top 1%’s wealth share dropped; median global wealth grew as did the number of millionaires",
+                        "The top 1%’s wealth share rose as did the number of millionaires; median global wealth dropped",
+                        "The top 1%’s wealth share grew; median global wealth dropped as did the number of millionaires"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Around how much was the estimated change in global wealth by 2027?",
+                    options: ["40% decrease", "40% increase", "20% decrease", "20% increase"],
+                    correct: 1
+                }
+            ],
+            "genderEquality.mp4": [
+                {
+                    question: "Which is not an issue women face mentioned in the video?",
+                    options: [
+                        "The majority of mothers with newborns do not receive maternity cash benefits",
+                        "Women are at greater risk of food insecurity than men",
+                        "Sex and/or gender is rarely considered in the development of safety equipment",
+                        "Sex and/or gender was rarely considered in COVID-19 research"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "Which is not an issue women face in the workplace and at home mentioned in the video?",
+                    options: [
+                        "The pandemic intensified women’s workload at home",
+                        "Reports of violence against women and girls are increasing in many parts of the world",
+                        "Women are not paid as much as men are",
+                        "Women suffered steeper job losses than men during the pandemic"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "What is the approximate ratio of parliamentary seats held by women?",
+                    options: ["One in two", "One in three", "One in four", "One in five"],
+                    correct: 2
+                },
+                {
+                    question: "How many SDG5 goals were met or almost met according to the latest global assessment of total level?",
+                    options: ["0", "1", "2", "3"],
+                    correct: 0
+                },
+                {
+                    question: "What year was set as the previous goal for achieving gender equality and women’s empowerment?",
+                    options: ["2025", "2030", "2035", "2040"],
+                    correct: 1
+                }
+            ],
+            "branding.mp4": [
+                {
+                    question: "Which of the following options best matches how the video initially describes a brand?",
+                    options: ["A logo", "Advertising", "Marketing", "A set of unique values", "Corporate identity"],
+                    correct: 3
+                },
+                {
+                    question: "In 2010, how did the value of Coca-cola compare to the GDPs of Bolivia, Kenya, and Bahrain?",
+                    options: [
+                        "Just under their total GDP",
+                        "Over their total GDP",
+                        "Around the average of their GDPs",
+                        "Over any one of their GDPs"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "Which of these options was not mentioned as something that could be branded?",
+                    options: ["Services", "People", "Places", "Emotions", "Religions"],
+                    correct: 3
+                },
+                {
+                    question: "What does the video mention as a remarkable achievement for a brand?",
+                    options: [
+                        "When the brand becomes a verb",
+                        "When the brand can afford advertisements featuring high profile celebrities",
+                        "When the brand becomes a synonym for its product",
+                        "When the brand is too large to fail"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "Which of the following is not a function of a brand mentioned in the video?",
+                    options: ["Finding information", "Sharing films", "Making music", "Making friends", "Adding to knowledge"],
+                    correct: 2
+                }
+            ]
+        };
+
+        let quizAnswers = {}; // Store user's selected answers
+
+        function renderQuiz(videoName) {
+            const quizContainer = document.getElementById("quizContainer");
+            quizContainer.innerHTML = ""; // Clear previous
+
+            const quiz = quizzes[videoName];
+            if (!quiz) return;
+
+            quizAnswers[videoName] = [];
+
+            quiz.forEach((q, idx) => {
+                const div = document.createElement("div");
+                div.innerHTML = `<p><strong>Q${idx + 1}: ${q.question}</strong></p>` + 
+                    q.options.map((opt, i) => `
+                        <label>
+                            <input type="radio" name="q${idx}" value="${i}" onchange="selectAnswer('${videoName}', ${idx}, ${i})">
+                            ${opt}
+                        </label><br>
+                    `).join("");
+                quizContainer.appendChild(div);
+            });
+        }
+
+        function selectAnswer(videoName, questionIndex, answerIndex) {
+            const quiz = quizzes[videoName];
+            if (!quizAnswers[videoName]) quizAnswers[videoName] = [];
+
+            quizAnswers[videoName][questionIndex] = {
+                selectedIndex: answerIndex,
+                selectedText: quiz[questionIndex].options[answerIndex]
+            };
+        }
+
 
         window.addEventListener("pagehide", () => {
             if (!dataAlreadySent) {
