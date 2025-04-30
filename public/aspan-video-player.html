@@ -147,6 +147,15 @@
             initializeTracking();
         }
 
+        function generateUserId() {
+            let uid = sessionStorage.getItem('uid');
+            if (!uid) {
+                uid = Math.random().toString(36).substr(2, 9);
+                sessionStorage.setItem('uid', uid);
+            }
+            return uid;
+        }
+
         const uid = generateUserId();  // Call only ONCE at the start
 
         function submitDataToServer() {
