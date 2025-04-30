@@ -1,42 +1,36 @@
 const UserView = require('../models/userViewModel');
 
 const recordView = async (req, res) => {
-  console.log("✅ Received POST /api/view");
-  console.log("📦 Payload:", req.body);
-  
   try {
-    const { userId, video, chunkViews, timestamp } = req.body;
+    console.log("📥 Received view data:", req.body);
 
-    if (!userId || !video || !chunkViews) {
-      console.error('⚠️ Invalid payload:', req.body);
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+    const { userId: uid, video, chunkViews } = req.body;
 
-    const chunksViewed = Object.keys(chunkViews)
-      .filter(chunk => chunkViews[chunk] > 0)
-      .map(Number);
+    // Format chunkViews into the expected structure
+    const chunks = Object.entries(chunkViews)
+      .filter(([_, count]) => count > 0)
+      .map(([chunk]) => parseInt(chunk));
 
     const update = {
-      $addToSet: {
+      $push: {
         views: {
           videoId: video,
-          chunksViewed: { $each: chunksViewed }
+          chunksViewed: chunks
         }
       }
     };
 
-    await UserView.findOneAndUpdate(
-      { uid: userId },
+    const result = await UserView.findOneAndUpdate(
+      { uid },
       update,
       { upsert: true, new: true }
     );
 
-    console.log(`✅ View data recorded for user: ${userId}, video: ${video}`);
-    res.status(200).json({ message: 'View recorded successfully' });
-
-  } catch (error) {
-    console.error('❌ Error recording view:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("✅ Mongo updated:", result);
+    res.status(200).send("Recorded");
+  } catch (err) {
+    console.error("❌ Error recording view:", err);
+    res.status(500).send("Server error");
   }
 };
 
