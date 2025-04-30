@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const UserView = require('../models/userViewModel');
 
 const recordView = async (req, res) => {
