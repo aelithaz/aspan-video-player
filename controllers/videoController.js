@@ -32,7 +32,11 @@ const recordView = async (req, res) => {
       // New user, create a new entry
       user = await UserView.create({
         uid,
-        views: [{ videoId: video, chunksViewed: chunks, correctAnswers: correctAnswers || 0 }]
+        views: [{
+          videoId: video,
+          chunksViewed: new Map(Object.entries(chunks)),
+          correctAnswers: correctAnswers || 0
+        }]
       });
     } else {
       // User exists, check if they already watched this video
@@ -50,7 +54,11 @@ const recordView = async (req, res) => {
         }
       } else {
         // Append new view entry for this video
-        user.views.push({ videoId: video, chunksViewed: chunks, correctAnswers: correctAnswers || 0 });
+        user.views.push({
+          videoId: video,
+          chunksViewed: new Map(Object.entries(chunks)),
+          correctAnswers: correctAnswers || 0
+        });
       }
 
       await user.save();
