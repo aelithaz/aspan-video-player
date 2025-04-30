@@ -40,6 +40,8 @@ const recordView = async (req, res) => {
     );
 
     console.log("✅ Mongo updated:", result);
+    console.log("📁 Mongoose DB:", mongoose.connection.name);
+    console.log("📂 Writing to collection:", UserView.collection.name);
     res.status(200).send("Recorded");
   } catch (err) {
     console.error("❌ Error recording view:", err);
