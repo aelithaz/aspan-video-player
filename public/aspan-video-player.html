@@ -242,15 +242,16 @@
 
         let dataAlreadySent = false;
 
-        video.onended = () => {
-            if (!dataAlreadySent) {
-                submitDataToServer();
-                dataAlreadySent = true;
-            }
-        };
+        // Send data on video end
+        // video.onended = () => {
+        //     if (!dataAlreadySent) {
+        //         submitDataToServer();
+        //         dataAlreadySent = true;
+        //     }
+        // };
 
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden" && !dataAlreadySent) {
+        document.addEventListener("pagehide", () => {
+            if (!dataAlreadySent) {
                 submitDataToServer();
                 dataAlreadySent = true;
             }
