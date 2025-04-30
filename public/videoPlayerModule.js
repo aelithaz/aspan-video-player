@@ -170,6 +170,7 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 initializeTracking();
+renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 
 export {
     changeVideo,
