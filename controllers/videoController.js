@@ -1,3 +1,5 @@
+const UserView = require('../models/userViewModel');
+
 const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
