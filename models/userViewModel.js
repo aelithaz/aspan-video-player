@@ -8,4 +8,4 @@ const UserViewSchema = new mongoose.Schema({
     }]
 });
 
-module.exports = mongoose.model('UserView', UserViewSchema);
+module.exports = mongoose.model('UserView', UserViewSchema, 'dataViews');
