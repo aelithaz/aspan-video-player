@@ -101,6 +101,20 @@
 
     <div id="quizContainer"></div>
 
-    <script type="module" src="videoPlayerModule.js"></script>
+    <script type="module">
+        import {
+          changeVideo,
+          playVideo,
+          pauseVideo,
+          rewind,
+          seekVideo
+        } from './videoPlayerModule.js';
+      
+        window.changeVideo = changeVideo;
+        window.playVideo = playVideo;
+        window.pauseVideo = pauseVideo;
+        window.rewind = rewind;
+        window.seekVideo = seekVideo;
+      </script>
 </body>
 </html>
