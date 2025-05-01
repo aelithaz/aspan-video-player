@@ -47,6 +47,7 @@ video.onloadedmetadata = () => {
     }
 };
 
+video.ontimeupdate = null;
 video.ontimeupdate = () => {
     const progress = (video.currentTime / video.duration) * 100;
     progressBar.style.width = progress + "%";
@@ -55,14 +56,21 @@ video.ontimeupdate = () => {
     }
 };
 
+let trackingInProgress = false;
+
 function trackChunkViews() {
-    let currentChunk = Math.floor(video.currentTime / chunkSize);
-    if (currentChunk !== lastChunk) {
-        if (chunkViews[currentVideo] && currentChunk in chunkViews[currentVideo]) {
-            chunkViews[currentVideo][currentChunk] += 1;
-        }
+    if (trackingInProgress) return;
+
+    trackingInProgress = true;
+
+    const currentChunk = Math.floor(video.currentTime / chunkSize);
+
+    if (currentChunk !== lastChunk && chunkViews[currentVideo]?.hasOwnProperty(currentChunk)) {
+        chunkViews[currentVideo][currentChunk]++;
         lastChunk = currentChunk;
     }
+
+    trackingInProgress = false;
 }
 
 function changeVideo() {
