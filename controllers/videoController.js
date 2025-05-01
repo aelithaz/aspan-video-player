@@ -1,5 +1,5 @@
 const UserView = require('../models/userViewModel');
-const SubmissionLog = require('../models/submissionLogModel');  // ✅ new line
+const SubmissionLog = require('../models/submissionLogModel');
 const mongoose = require('mongoose');
 
 const recordView = async (req, res) => {
@@ -37,6 +37,10 @@ const recordView = async (req, res) => {
     }
 
     let user = await UserView.findOne({ uid });
+    if (user?.views?.length > 0) {
+      const videoOrder = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
+      user.views.sort((a, b) => videoOrder.indexOf(a.videoId) - videoOrder.indexOf(b.videoId));
+    }
 
     if (!user) {
       try {
