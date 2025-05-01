@@ -5,14 +5,13 @@ const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
 
-    const { userId: uid, video, chunkViews, correctAnswers } = req.body;
+    const { userId: uid, video, chunkViews, quizCorrect } = req.body;
 
     if (!uid || !video || typeof chunkViews !== 'object') {
       console.warn("⚠️ Invalid payload:", { uid, video, chunkViews });
       return res.status(400).send("Invalid request body");
     }
 
-    // Convert chunkViews into an object of viewed chunk counts
     const chunks = Object.entries(chunkViews)
       .filter(([_, count]) => count > 0)
       .reduce((acc, [chunk, count]) => {
@@ -20,44 +19,38 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
-    if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
+    if (Object.keys(chunks).length === 0 && typeof quizCorrect !== 'number') {
       console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
     }
 
-    // Try to find an existing user view record
     let user = await UserView.findOne({ uid });
 
     if (!user) {
-      // New user, create a new entry
       user = await UserView.create({
         uid,
         views: [{
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
+          correctAnswers: typeof quizCorrect === 'number' ? quizCorrect : 0
         }]
       });
     } else {
-      // User exists, check if they already watched this video
       const existingView = user.views.find(v => v.videoId === video);
 
       if (existingView) {
-        // Merge and accumulate chunk view counts
         for (const [chunk, count] of Object.entries(chunks)) {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
           existingView.chunksViewed.set(chunk, prevCount + count);
         }
-        // Update correctAnswers if provided
-        if (typeof correctAnswers === 'number') {
-          existingView.correctAnswers = correctAnswers;
+        if (typeof quizCorrect === 'number') {
+          existingView.correctAnswers = quizCorrect;
         }
       } else {
-        // Append new view entry for this video
         user.views.push({
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
+          correctAnswers: typeof quizCorrect === 'number' ? quizCorrect : 0
         });
       }
 
