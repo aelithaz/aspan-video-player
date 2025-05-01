@@ -29,15 +29,26 @@ const recordView = async (req, res) => {
     let user = await UserView.findOne({ uid });
 
     if (!user) {
-      user = await UserView.create({
-        uid,
-        views: [{
-          videoId: video,
-          chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
-        }]
-      });
-    } else {
+      try {
+        user = await UserView.create({
+          uid,
+          views: [{
+            videoId: video,
+            chunksViewed: new Map(Object.entries(chunks)),
+            correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
+          }]
+        });
+      } catch (err) {
+        if (err.code === 11000) {
+          console.warn("⚠️ Duplicate UID encountered, retrying update...");
+          user = await UserView.findOne({ uid });
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (user) {
       const existingView = user.views.find(v => v.videoId === video);
 
       if (existingView) {
