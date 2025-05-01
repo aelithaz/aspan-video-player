@@ -80,10 +80,11 @@ function submitDataToServer() {
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
-        const videoChunks = chunkViews[video];
+        const videoChunks = chunkViews[video] || {};
+        const hasViews = Object.values(videoChunks).some(count => count > 0);
+        const hasQuiz = quizAnswers[video] && quizAnswers[video].length > 0;
 
-        const hasViews = videoChunks && Object.values(videoChunks).some(count => count > 0);
-        if (!hasViews) continue;
+        if (!hasViews && !hasQuiz) continue;
 
         const correctAnswers = quizAnswers[video]?.filter((entry, i) =>
             entry?.selectedIndex === quizzes[video][i].correct
@@ -177,8 +178,10 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
     handleQuizAnswer(videoName, questionIndex, answerIndex, quizAnswers);
 }
 
-initializeTracking();
-renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
+window.onload = () => {
+    initializeTracking();
+    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
+};
 
 export {
     changeVideo,
