@@ -33,6 +33,7 @@ function setupChunks() {
         }
     }
     createChunkMarkers(numChunks);
+    lastChunk = -1; // Reset lastChunk to avoid overcount
 }
 
 video.onloadedmetadata = () => {
