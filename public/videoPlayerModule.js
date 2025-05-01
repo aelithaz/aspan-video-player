@@ -94,6 +94,10 @@ function generateUserId() {
 
 const uid = generateUserId();  // Call only ONCE at the start
 
+function generateSubmissionTimestamp(video) {
+    return `${new Date().toISOString()}_${video}_${Math.random().toString(36).substring(2, 6)}`;
+}
+
 let submitting = false;
 
 function submitDataToServer() {
@@ -129,7 +133,7 @@ function submitDataToServer() {
             userId: uid,
             video: video,
             chunkViews: videoChunks,
-            timestamp: new Date().toISOString(),
+            timestamp: generateSubmissionTimestamp(video),
             quizCorrect: correctAnswers,
             selectedAnswers: selectedAnswers
         };
