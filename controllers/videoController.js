@@ -39,13 +39,20 @@ const recordView = async (req, res) => {
       const existingView = user.views.find(v => v.videoId === video);
 
       if (existingView) {
+        if (!(existingView.chunksViewed instanceof Map)) {
+          existingView.chunksViewed = new Map(Object.entries(existingView.chunksViewed));
+        }
+
         for (const [chunk, count] of Object.entries(chunks)) {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
           existingView.chunksViewed.set(chunk, prevCount + count);
         }
+
         if (typeof quizCorrect === 'number') {
           existingView.correctAnswers = quizCorrect;
         }
+
+        user.markModified('views');
       } else {
         user.views.push({
           videoId: video,
@@ -54,6 +61,7 @@ const recordView = async (req, res) => {
         });
       }
 
+      user.markModified('views');
       await user.save();
     }
 
