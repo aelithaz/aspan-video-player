@@ -17,15 +17,19 @@ let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 
 function initializeTracking() {
-    if (chunkViews[currentVideo]) return;  // ✅ Skip if already initialized
-
     let numChunks = Math.ceil(video.duration / chunkSize);
-    chunkViews[currentVideo] = {};
-    for (let i = 0; i < numChunks; i++) {
-        chunkViews[currentVideo][i] = 0;
+
+    if (!chunkViews[currentVideo]) {
+        chunkViews[currentVideo] = {};
+        for (let i = 0; i < numChunks; i++) {
+            chunkViews[currentVideo][i] = 0;
+        }
     }
 
-    recordedChunks[currentVideo] = new Set();
+    if (!recordedChunks[currentVideo]) {
+        recordedChunks[currentVideo] = new Set();
+    }
+
     createChunkMarkers(numChunks);
     lastChunk = -1;
 }
