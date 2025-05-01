@@ -20,8 +20,8 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
-      if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
-      console.log("⚠️ No chunks viewed — skipping DB update");
+    if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
+      console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
     }
 
@@ -35,7 +35,7 @@ const recordView = async (req, res) => {
         views: [{
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: correctAnswers || 0
+          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
         }]
       });
     } else {
@@ -48,7 +48,7 @@ const recordView = async (req, res) => {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
           existingView.chunksViewed.set(chunk, prevCount + count);
         }
-        // Update correctAnswers
+        // Update correctAnswers if provided
         if (typeof correctAnswers === 'number') {
           existingView.correctAnswers = correctAnswers;
         }
@@ -57,7 +57,7 @@ const recordView = async (req, res) => {
         user.views.push({
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: correctAnswers || 0
+          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
         });
       }
 
