@@ -106,6 +106,8 @@ function submitDataToServer() {
             selected: entry?.selectedText || null
         })) || [];
 
+        console.log("💾 Submitting chunks for:", video, chunkViews[video]);
+
         const payload = {
             userId: uid,
             video: video,
