@@ -46,6 +46,14 @@ function trackChunkViews() {
 }
 
 function changeVideo() {
+    if (!chunkViews[currentVideo] && !isNaN(video.duration)) {
+        let numChunks = Math.ceil(video.duration / chunkSize);
+        chunkViews[currentVideo] = {};
+        for (let i = 0; i < numChunks; i++) {
+            chunkViews[currentVideo][i] = 0;
+        }
+    }
+
     currentVideo = videoSelector.value;
     video.pause();
     videoSource.src = "videos/" + currentVideo;
