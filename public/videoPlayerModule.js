@@ -26,6 +26,7 @@ function initializeTracking() {
             }
         }
         createChunkMarkers(numChunks);
+        renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
     };
 }
 
@@ -178,7 +179,6 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 initializeTracking();
-renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 
 export {
     changeVideo,
