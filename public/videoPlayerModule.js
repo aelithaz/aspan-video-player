@@ -13,10 +13,8 @@ let lastChunk = -1; // Tracks last recorded chunk
 let currentVideo = "wealthReport.mp4"; // Default video
 let manualSeek = false; // Tracks manual seeking
 let seekWhilePaused = false; // Checks if seeking is done while paused
-let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 let recordedChunks = {}; // Prevents double counting
-const submittedVideos = new Set(); // Prevent per-video duplication
 
 function initializeTracking() {
     let numChunks = Math.ceil(video.duration / chunkSize);
@@ -112,23 +110,19 @@ function markSubmitted(video) {
     sessionStorage.setItem(`submitted_${video}`, 'true');
 }
 
+const submittedPayloads = new Set();
+
 function submitDataToServer() {
-    if (submitting || dataAlreadySent) {
-        console.warn("⏹️ Prevented duplicate submission");
+    if (submitting) {
+        console.warn("⏹️ Prevented duplicate submission in progress");
         return;
     }
     submitting = true;
-    dataAlreadySent = true;
     console.warn("🚨 SUBMITTING DATA NOW");
 
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
-        if (submittedVideos.has(video)) {
-            console.warn("⚠️ Skipping already-submitted video:", video);
-            continue;
-        }
-
         const videoChunks = chunkViews[video] || {};
         const hasViews = Object.values(videoChunks).some(count => count > 0);
         const hasQuiz = quizAnswers[video] && quizAnswers[video].length > 0;
@@ -144,24 +138,29 @@ function submitDataToServer() {
             selected: entry?.selectedText || null
         })) || [];
 
-        console.log("💾 Submitting chunks for:", video, chunkViews[video]);
-
         const payload = {
             userId: uid,
             video: video,
             chunkViews: videoChunks,
-            timestamp: getStableSubmissionTimestamp(video),
+            timestamp: `${new Date().toISOString()}_${video}_${Math.random().toString(36).substring(2, 6)}`,
             quizCorrect: correctAnswers,
             selectedAnswers: selectedAnswers
         };
+
+        const payloadKey = `${uid}_${video}_${JSON.stringify(payload.chunkViews)}`;
+        if (submittedPayloads.has(payloadKey)) {
+            console.warn("⚠️ Skipping duplicate payload:", payloadKey);
+            continue;
+        }
+        submittedPayloads.add(payloadKey);  // ✅ mark this combo submitted
 
         const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
         console.log("🔔 Sending beacon with payload:", payload);
         const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
         console.log("📤 Beacon success:", success);
-
-        submittedVideos.add(video);
     }
+
+    submitting = false;
 }
 
 function playVideo() {
