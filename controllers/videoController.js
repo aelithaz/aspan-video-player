@@ -5,7 +5,7 @@ const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
 
-    const { userId: uid, video, chunkViews, quizCorrect } = req.body;
+    const { userId: uid, video, chunkViews, quizCorrect: correctAnswers } = req.body;
 
     if (!uid || !video || typeof chunkViews !== 'object') {
       console.warn("⚠️ Invalid payload:", { uid, video, chunkViews });
@@ -20,8 +20,8 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
-    // Only skip if both views are empty AND quizCorrect is not a number
-    if (Object.keys(chunks).length === 0 && typeof quizCorrect !== 'number') {
+    // Only skip if both views are empty AND correctAnswers is not a number
+    if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
       console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
     }
@@ -34,7 +34,7 @@ const recordView = async (req, res) => {
         views: [{
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: typeof quizCorrect === 'number' ? quizCorrect : 0
+          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
         }]
       });
     } else {
@@ -50,8 +50,8 @@ const recordView = async (req, res) => {
           existingView.chunksViewed.set(chunk, prevCount + count);
         }
 
-        if (typeof quizCorrect === 'number') {
-          existingView.correctAnswers = quizCorrect;
+        if (typeof correctAnswers === 'number') {
+          existingView.correctAnswers = correctAnswers;
         }
 
         user.markModified('views');
@@ -59,7 +59,7 @@ const recordView = async (req, res) => {
         user.views.push({
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
-          correctAnswers: typeof quizCorrect === 'number' ? quizCorrect : 0
+          correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
         });
       }
 
