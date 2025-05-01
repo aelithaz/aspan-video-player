@@ -49,17 +49,10 @@ video.ontimeupdate = () => {
 
 function trackChunkViews() {
     let currentChunk = Math.floor(video.currentTime / chunkSize);
-
-    if (!chunkViews[currentVideo]) {
-        let numChunks = Math.ceil(video.duration / chunkSize);
-        chunkViews[currentVideo] = {};
-        for (let i = 0; i < numChunks; i++) {
-            chunkViews[currentVideo][i] = 0;
-        }
-    }
-
     if (currentChunk !== lastChunk) {
-        chunkViews[currentVideo][currentChunk] = (chunkViews[currentVideo][currentChunk] || 0) + 1;
+        if (chunkViews[currentVideo] && currentChunk in chunkViews[currentVideo]) {
+            chunkViews[currentVideo][currentChunk] += 1;
+        }
         lastChunk = currentChunk;
     }
 }
@@ -200,6 +193,7 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 window.onload = () => {
+    initializeTracking();
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 };
 
