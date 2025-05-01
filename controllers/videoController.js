@@ -12,13 +12,15 @@ const recordView = async (req, res) => {
       return res.status(400).send("Invalid request body");
     }
 
-    const chunks = Object.entries(chunkViews)
+    // Always convert chunkViews into a Map and check actual views
+    const chunks = Object.entries(chunkViews || {})
       .filter(([_, count]) => count > 0)
       .reduce((acc, [chunk, count]) => {
         acc[chunk] = count;
         return acc;
       }, {});
 
+    // Only skip if both views are empty AND quizCorrect is not a number
     if (Object.keys(chunks).length === 0 && typeof quizCorrect !== 'number') {
       console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
@@ -61,7 +63,6 @@ const recordView = async (req, res) => {
         });
       }
 
-      user.markModified('views');
       await user.save();
     }
 
