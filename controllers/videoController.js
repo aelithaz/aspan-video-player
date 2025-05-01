@@ -13,14 +13,15 @@ const recordView = async (req, res) => {
       return res.status(400).send("Invalid request body");
     }
 
-    // ✅ Deduplication: skip if already submitted
-    const submissionId = `${uid}_${video}_${timestamp}`;
-    const existingSubmission = await SubmissionLog.findOne({ submissionId });
-    if (existingSubmission) {
-      console.warn("⚠️ Duplicate submission ignored:", submissionId);
-      return res.status(200).send("Duplicate submission ignored");
+    try {
+      await SubmissionLog.create({ submissionId });
+    } catch (err) {
+      if (err.code === 11000) {
+        console.warn("⚠️ Duplicate caught on insert:", submissionId);
+        return res.status(200).send("Duplicate submission (insert race)");
+      }
+      throw err;
     }
-    await SubmissionLog.create({ submissionId });  // ✅ record it
 
     const chunks = Object.entries(chunkViews || {})
       .filter(([_, count]) => count > 0)
