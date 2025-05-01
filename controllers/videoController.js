@@ -74,7 +74,10 @@ const recordView = async (req, res) => {
 
         for (const [chunk, count] of Object.entries(chunks)) {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
-          existingView.chunksViewed.set(chunk, prevCount + count);
+          // Only update if the new count is higher
+          if (count > prevCount) {
+            existingView.chunksViewed.set(chunk, count);
+          }
         }
 
         if (typeof correctAnswers === 'number') {
