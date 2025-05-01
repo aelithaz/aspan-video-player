@@ -45,7 +45,7 @@ export const quizzes = {
   ],
   "genderEquality.mp4": [
     {
-      question: "Which is not an issue women face mentioned in the video?",
+      question: "Which of the following issues affecting women is not mentioned in the video?",
       options: [
         "The majority of mothers with newborns do not receive maternity cash benefits",
         "Women are at greater risk of food insecurity than men",
@@ -55,7 +55,7 @@ export const quizzes = {
       correct: 2
     },
     {
-      question: "Which is not an issue women face in the workplace and at home mentioned in the video?",
+      question: "Which of the following challenges women face at home or in the workplace is not discussed in the video?",
       options: [
         "The pandemic intensified women’s workload at home",
         "Reports of violence against women and girls are increasing in many parts of the world",

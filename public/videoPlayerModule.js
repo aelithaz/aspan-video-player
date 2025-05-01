@@ -7,6 +7,7 @@ const videoSelector = document.getElementById("videoSelector");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
 const chunkMarkers = document.getElementById("chunkMarkers");
+const submitButton = document.getElementById("submitButton");
 const chunkSize = 5; // 5-second chunks
 let chunkViews = {}; // Stores chunk views per video
 let lastChunk = -1; // Tracks last recorded chunk
@@ -40,11 +41,28 @@ video.onloadedmetadata = () => {
     initializeTracking();
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 
-    // Avoid re-triggering changeVideo() on page load if default video is already selected
     if (firstLoad) {
         firstLoad = false;
     }
+
+    // Show submit button only for the third video
+    if (currentVideo === "branding.mp4") {
+        submitButton.style.display = "inline-block";
+        submitButton.disabled = false;
+        submitButton.innerText = "Submit";
+    } else {
+        submitButton.style.display = "none";
+    }
 };
+
+submitButton.addEventListener("click", () => {
+    if (submitButton.disabled) return;
+
+    submitButton.disabled = true;
+    submitButton.innerText = "Submitted";
+
+    submitDataToServer();
+});
 
 video.ontimeupdate = null;
 video.ontimeupdate = () => {
@@ -222,9 +240,10 @@ document.getElementById("volumeSlider").addEventListener("input", function () {
     video.volume = parseFloat(this.value);
 });
 
-window.addEventListener("pagehide", () => {
-    submitDataToServer();
-});
+// Submit data on tab close
+// window.addEventListener("pagehide", () => {
+//     submitDataToServer();
+// });
 
 function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
     handleQuizAnswer(videoName, questionIndex, answerIndex, quizAnswers);
