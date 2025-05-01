@@ -94,12 +94,16 @@ function generateUserId() {
 
 const uid = generateUserId();  // Call only ONCE at the start
 
+let submitting = false;
+
 function submitDataToServer() {
-    if (dataAlreadySent) {
+    if (submitting || dataAlreadySent) {
         console.warn("⏹️ Prevented duplicate submission");
         return;
     }
+    submitting = true;
     dataAlreadySent = true;
+    console.warn("🚨 SUBMITTING DATA NOW");
 
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
