@@ -95,8 +95,11 @@ function generateUserId() {
 
 const uid = generateUserId();  // Call only ONCE at the start
 
-function generateSubmissionTimestamp(video) {
-    return `${new Date().toISOString()}_${video}_${Math.random().toString(36).substring(2, 6)}`;
+function getStableSubmissionTimestamp(video) {
+    if (!submissionTimestamps[video]) {
+        submissionTimestamps[video] = `${new Date().toISOString()}_${video}`;
+    }
+    return submissionTimestamps[video];
 }
 
 let submitting = false;
@@ -147,7 +150,7 @@ function submitDataToServer() {
             userId: uid,
             video: video,
             chunkViews: videoChunks,
-            timestamp: generateSubmissionTimestamp(video),
+            timestamp: getStableSubmissionTimestamp(video),
             quizCorrect: correctAnswers,
             selectedAnswers: selectedAnswers
         };
