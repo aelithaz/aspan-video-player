@@ -49,7 +49,16 @@ video.ontimeupdate = () => {
 
 function trackChunkViews() {
     let currentChunk = Math.floor(video.currentTime / chunkSize);
-    if (currentChunk !== lastChunk) { 
+
+    if (!chunkViews[currentVideo]) {
+        let numChunks = Math.ceil(video.duration / chunkSize);
+        chunkViews[currentVideo] = {};
+        for (let i = 0; i < numChunks; i++) {
+            chunkViews[currentVideo][i] = 0;
+        }
+    }
+
+    if (currentChunk !== lastChunk) {
         chunkViews[currentVideo][currentChunk] = (chunkViews[currentVideo][currentChunk] || 0) + 1;
         lastChunk = currentChunk;
     }
@@ -130,6 +139,9 @@ function playVideo() {
             trackChunkViews();     
             seekWhilePaused = false;
         }, 100);
+    }
+    else if (lastChunk === -1) {
+        trackChunkViews(); // ensure first view gets tracked
     }
 
     video.play();
