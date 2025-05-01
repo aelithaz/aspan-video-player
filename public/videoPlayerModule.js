@@ -15,6 +15,7 @@ let manualSeek = false; // Tracks manual seeking
 let seekWhilePaused = false; // Checks if seeking is done while paused
 let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
+let chunkTrackGuard = {}; // Track recent time updates per video
 
 function initializeTracking() {
     if (video.readyState >= 1) {
@@ -32,8 +33,9 @@ function setupChunks() {
             chunkViews[currentVideo][i] = 0;
         }
     }
+    chunkTrackGuard[currentVideo] = new Set();
     createChunkMarkers(numChunks);
-    lastChunk = -1; // Reset lastChunk to avoid overcount
+    lastChunk = -1;
 }
 
 video.onloadedmetadata = () => {
@@ -49,11 +51,25 @@ video.ontimeupdate = () => {
 };
 
 function trackChunkViews() {
-    let currentChunk = Math.floor(video.currentTime / chunkSize);
-    if (currentChunk !== lastChunk) {
-        if (chunkViews[currentVideo] && currentChunk in chunkViews[currentVideo]) {
-            chunkViews[currentVideo][currentChunk] += 1;
+    const currentTime = Math.floor(video.currentTime);
+    const currentChunk = Math.floor(video.currentTime / chunkSize);
+
+    if (!chunkViews[currentVideo]) {
+        let numChunks = Math.ceil(video.duration / chunkSize);
+        chunkViews[currentVideo] = {};
+        for (let i = 0; i < numChunks; i++) {
+            chunkViews[currentVideo][i] = 0;
         }
+    }
+
+    if (!chunkTrackGuard[currentVideo]) {
+        chunkTrackGuard[currentVideo] = new Set();
+    }
+
+    const guardKey = `${currentChunk}:${currentTime}`;
+    if (!chunkTrackGuard[currentVideo].has(guardKey)) {
+        chunkViews[currentVideo][currentChunk]++;
+        chunkTrackGuard[currentVideo].add(guardKey);
         lastChunk = currentChunk;
     }
 }
@@ -71,9 +87,9 @@ function changeVideo() {
     video.pause();
     videoSource.src = "videos/" + currentVideo;
     video.load();
-    lastChunk = -1; // Reset chunk tracking
+    lastChunk = -1;
     video.currentTime = 0;
-    progressBar.style.width = "0%"; 
+    progressBar.style.width = "0%";
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 }
 
@@ -86,7 +102,7 @@ function generateUserId() {
     return uid;
 }
 
-const uid = generateUserId();  // Call only ONCE at the start
+const uid = generateUserId();
 
 function submitDataToServer() {
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
@@ -130,12 +146,11 @@ function playVideo() {
 
     if (seekWhilePaused) {
         setTimeout(() => {
-            trackChunkViews();     
+            trackChunkViews();
             seekWhilePaused = false;
         }, 100);
-    }
-    else if (lastChunk === -1) {
-        trackChunkViews(); // ensure first view gets tracked
+    } else if (lastChunk === -1) {
+        trackChunkViews();
     }
 
     video.play();
@@ -169,7 +184,7 @@ function seekVideo(event) {
     manualSeek = true;
 
     if (video.paused) {
-        seekWhilePaused = true;  
+        seekWhilePaused = true;
     } else {
         setTimeout(() => {
             trackChunkViews();
