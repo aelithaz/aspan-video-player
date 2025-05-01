@@ -16,7 +16,6 @@ let seekWhilePaused = false; // Checks if seeking is done while paused
 let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 let recordedChunks = {}; // Prevents double counting
-let initialized = false; // Prevents duplicate setup
 
 function initializeTracking() {
     let numChunks = Math.ceil(video.duration / chunkSize);
@@ -36,11 +35,15 @@ function initializeTracking() {
     lastChunk = -1;
 }
 
+let firstLoad = true;
+
 video.onloadedmetadata = () => {
-    if (!initialized) {
-        initializeTracking();
-        renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
-        initialized = true;
+    initializeTracking();
+    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
+
+    // Avoid re-triggering changeVideo() on page load if default video is already selected
+    if (firstLoad) {
+        firstLoad = false;
     }
 };
 
