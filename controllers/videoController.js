@@ -30,7 +30,7 @@ const recordView = async (req, res) => {
 
     if (!user) {
       try {
-        user = await UserView.create({
+        await UserView.create({
           uid,
           views: [{
             videoId: video,
@@ -38,6 +38,7 @@ const recordView = async (req, res) => {
             correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
           }]
         });
+        user = await UserView.findOne({ uid });
       } catch (err) {
         if (err.code === 11000) {
           console.warn("⚠️ Duplicate UID encountered, retrying update...");
