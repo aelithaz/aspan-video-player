@@ -17,17 +17,19 @@ let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 
 function initializeTracking() {
-    video.onloadedmetadata = () => {
-        let numChunks = Math.ceil(video.duration / chunkSize);
-        if (!chunkViews[currentVideo]) {
-            chunkViews[currentVideo] = {};
-            for (let i = 0; i < numChunks; i++) {
-                chunkViews[currentVideo][i] = 0;
-            }
+    let numChunks = Math.ceil(video.duration / chunkSize);
+    if (!chunkViews[currentVideo]) {
+        chunkViews[currentVideo] = {};
+        for (let i = 0; i < numChunks; i++) {
+            chunkViews[currentVideo][i] = 0;
         }
-        createChunkMarkers(numChunks);
-    };
+    }
+    createChunkMarkers(numChunks);
 }
+
+video.onloadedmetadata = () => {
+    initializeTracking();
+};
 
 video.ontimeupdate = () => {
     const progress = (video.currentTime / video.duration) * 100;
@@ -61,7 +63,6 @@ function changeVideo() {
     lastChunk = -1; // Reset chunk tracking
     video.currentTime = 0;
     progressBar.style.width = "0%"; 
-    initializeTracking();
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 }
 
@@ -179,7 +180,6 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 window.onload = () => {
-    initializeTracking();
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 };
 
