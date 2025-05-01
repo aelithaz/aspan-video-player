@@ -15,6 +15,7 @@ let manualSeek = false; // Tracks manual seeking
 let seekWhilePaused = false; // Checks if seeking is done while paused
 let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
+let recordedChunks = {}; // Prevents double counting
 
 function initializeTracking() {
     let numChunks = Math.ceil(video.duration / chunkSize);
@@ -36,6 +37,7 @@ function initializeTracking() {
 
 video.onloadedmetadata = () => {
     initializeTracking();
+    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 };
 
 video.ontimeupdate = () => {
@@ -72,7 +74,6 @@ function changeVideo() {
     lastChunk = -1; // Reset chunk tracking
     video.currentTime = 0;
     progressBar.style.width = "0%"; 
-    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 }
 
 function generateUserId() {
@@ -193,7 +194,6 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 
 window.onload = () => {
     initializeTracking();
-    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 };
 
 export {
