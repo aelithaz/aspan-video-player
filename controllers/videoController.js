@@ -20,7 +20,7 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
-    if (Object.keys(chunks).length === 0) {
+      if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
       console.log("⚠️ No chunks viewed — skipping DB update");
       return res.status(204).send("No meaningful data to record");
     }

@@ -5,10 +5,10 @@ export const quizzes = {
     {
       question: "Which of these inferences can be made from the video?",
       options: [
-        "2022 resulted in a real wealth loss and real estate may weaken if housing prices drop",
-        "2022 resulted in a real wealth loss and real estate may become stronger if housing prices drop",
-        "2022 resulted in a real wealth gain and real estate may weaken if housing prices drop",
-        "2022 resulted in a real wealth gain and real estate may become stronger if housing prices drop"
+        "2022 resulted in a real wealth loss; real estate may weaken if housing prices drop",
+        "2022 resulted in a real wealth loss; real estate may become stronger if housing prices drop",
+        "2022 resulted in a real wealth gain; real estate may weaken if housing prices drop",
+        "2022 resulted in a real wealth gain; real estate may become stronger if housing prices drop"
       ],
       correct: 0
     },
@@ -23,7 +23,7 @@ export const quizzes = {
         "Gains in North America and Latin America and losses in Europe",
         "Gains in North America and Europe and losses in Latin America",
         "Gains in Europe and losses in North America and Latin America",
-        "Gains in Latin America and Losses in North America and Europe"
+        "Gains in Latin America and losses in North America and Europe"
       ],
       correct: 3
     },
@@ -32,7 +32,7 @@ export const quizzes = {
       options: [
         "The top 1%’s wealth share dropped as did the number of millionaires; median global wealth grew",
         "The top 1%’s wealth share dropped; median global wealth grew as did the number of millionaires",
-        "The top 1%’s wealth share rose as did the number of millionaires; median global wealth dropped",
+        "The top 1%’s wealth share grew as did the number of millionaires; median global wealth dropped",
         "The top 1%’s wealth share grew; median global wealth dropped as did the number of millionaires"
       ],
       correct: 0
