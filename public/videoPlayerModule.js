@@ -178,9 +178,7 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 initializeTracking();
-video.addEventListener("loadedmetadata", () => {
-    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
-}, { once: true });
+renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 
 export {
     changeVideo,

@@ -128,6 +128,7 @@ export const quizzes = {
  */
 export function renderQuiz(videoName, container, quizAnswers, handleAnswer) {
     container.innerHTML = ""; // Clear previous
+    console.log("Rendering quiz for", videoName, quizzes[videoName]);
 
     const quiz = quizzes[videoName];
     if (!quiz) return;
