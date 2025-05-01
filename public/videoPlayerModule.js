@@ -16,6 +16,7 @@ let seekWhilePaused = false; // Checks if seeking is done while paused
 let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 let recordedChunks = {}; // Prevents double counting
+const submittedVideos = new Set(); // Prevent per-video duplication
 
 function initializeTracking() {
     let numChunks = Math.ceil(video.duration / chunkSize);
@@ -120,7 +121,7 @@ function submitDataToServer() {
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
-        if (hasSubmitted(video)) {
+        if (submittedVideos.has(video)) {
             console.warn("⚠️ Skipping already-submitted video:", video);
             continue;
         }
@@ -156,7 +157,7 @@ function submitDataToServer() {
         const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
         console.log("📤 Beacon success:", success);
 
-        markSubmitted(video);
+        submittedVideos.add(video);
     }
 }
 
