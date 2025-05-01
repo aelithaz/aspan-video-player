@@ -15,7 +15,6 @@ let manualSeek = false; // Tracks manual seeking
 let seekWhilePaused = false; // Checks if seeking is done while paused
 let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
-let lastRecordedTime = -1; // Prevent double count within short time
 
 function initializeTracking() {
     if (video.readyState >= 1) {
@@ -34,8 +33,7 @@ function setupChunks() {
         }
     }
     createChunkMarkers(numChunks);
-    lastChunk = -1;
-    lastRecordedTime = -1;
+    lastChunk = -1; // Reset lastChunk to avoid overcount
 }
 
 video.onloadedmetadata = () => {
@@ -51,21 +49,9 @@ video.ontimeupdate = () => {
 };
 
 function trackChunkViews() {
-    const now = Math.floor(video.currentTime);
-    if (now === lastRecordedTime) return; // Prevent duplicate recording from rapid triggers
-    lastRecordedTime = now;
-
     let currentChunk = Math.floor(video.currentTime / chunkSize);
-    if (!chunkViews[currentVideo]) {
-        let numChunks = Math.ceil(video.duration / chunkSize);
-        chunkViews[currentVideo] = {};
-        for (let i = 0; i < numChunks; i++) {
-            chunkViews[currentVideo][i] = 0;
-        }
-    }
-
     if (currentChunk !== lastChunk) {
-        if (currentChunk in chunkViews[currentVideo]) {
+        if (chunkViews[currentVideo] && currentChunk in chunkViews[currentVideo]) {
             chunkViews[currentVideo][currentChunk] += 1;
         }
         lastChunk = currentChunk;
@@ -85,10 +71,9 @@ function changeVideo() {
     video.pause();
     videoSource.src = "videos/" + currentVideo;
     video.load();
-    lastChunk = -1;
-    lastRecordedTime = -1;
+    lastChunk = -1; // Reset chunk tracking
     video.currentTime = 0;
-    progressBar.style.width = "0%";
+    progressBar.style.width = "0%"; 
     renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 }
 
@@ -101,7 +86,7 @@ function generateUserId() {
     return uid;
 }
 
-const uid = generateUserId();
+const uid = generateUserId();  // Call only ONCE at the start
 
 function submitDataToServer() {
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
@@ -145,11 +130,12 @@ function playVideo() {
 
     if (seekWhilePaused) {
         setTimeout(() => {
-            trackChunkViews();
+            trackChunkViews();     
             seekWhilePaused = false;
         }, 100);
-    } else if (lastChunk === -1) {
-        trackChunkViews();
+    }
+    else if (lastChunk === -1) {
+        trackChunkViews(); // ensure first view gets tracked
     }
 
     video.play();
@@ -183,7 +169,7 @@ function seekVideo(event) {
     manualSeek = true;
 
     if (video.paused) {
-        seekWhilePaused = true;
+        seekWhilePaused = true;  
     } else {
         setTimeout(() => {
             trackChunkViews();
