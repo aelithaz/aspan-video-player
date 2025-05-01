@@ -100,6 +100,14 @@ function generateSubmissionTimestamp(video) {
 
 let submitting = false;
 
+function hasSubmitted(video) {
+    return sessionStorage.getItem(`submitted_${video}`) === 'true';
+}
+
+function markSubmitted(video) {
+    sessionStorage.setItem(`submitted_${video}`, 'true');
+}
+
 function submitDataToServer() {
     if (submitting || dataAlreadySent) {
         console.warn("⏹️ Prevented duplicate submission");
@@ -112,6 +120,11 @@ function submitDataToServer() {
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
+        if (hasSubmitted(video)) {
+            console.warn("⚠️ Skipping already-submitted video:", video);
+            continue;
+        }
+
         const videoChunks = chunkViews[video] || {};
         const hasViews = Object.values(videoChunks).some(count => count > 0);
         const hasQuiz = quizAnswers[video] && quizAnswers[video].length > 0;
@@ -142,6 +155,8 @@ function submitDataToServer() {
         console.log("🔔 Sending beacon with payload:", payload);
         const success = navigator.sendBeacon("https://aspan-video-player.onrender.com/api/view", blob);
         console.log("📤 Beacon success:", success);
+
+        markSubmitted(video);
     }
 }
 
