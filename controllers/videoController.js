@@ -13,6 +13,7 @@ const recordView = async (req, res) => {
       return res.status(400).send("Invalid request body");
     }
 
+    const submissionId = `${uid}_${video}_${timestamp}`;
     try {
       await SubmissionLog.create({ submissionId });
     } catch (err) {
