@@ -73,7 +73,7 @@ function changeVideo() {
     video.load();
     lastChunk = -1; // Reset chunk tracking
     video.currentTime = 0;
-    progressBar.style.width = "0%"; 
+    progressBar.style.width = "0%";
 }
 
 function generateUserId() {
@@ -194,6 +194,7 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 
 window.onload = () => {
     initializeTracking();
+    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
 };
 
 export {
