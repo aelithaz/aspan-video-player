@@ -210,8 +210,8 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 window.onload = () => {
-    initializeTracking();
-    renderQuiz(currentVideo, document.getElementById("quizContainer"), quizAnswers, handleQuizAnswerWrapper);
+    videoSource.src = "videos/" + currentVideo;
+    video.load();  
 };
 
 export {
