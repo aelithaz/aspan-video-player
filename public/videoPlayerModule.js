@@ -74,14 +74,6 @@ function trackChunkViews() {
 }
 
 function changeVideo() {
-    if (!chunkViews[currentVideo] && !isNaN(video.duration)) {
-        let numChunks = Math.ceil(video.duration / chunkSize);
-        chunkViews[currentVideo] = {};
-        for (let i = 0; i < numChunks; i++) {
-            chunkViews[currentVideo][i] = 0;
-        }
-    }
-
     currentVideo = videoSelector.value;
     video.pause();
     videoSource.src = "videos/" + currentVideo;
@@ -108,7 +100,7 @@ function submitDataToServer() {
         return;
     }
     dataAlreadySent = true;
-    
+
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
@@ -205,10 +197,7 @@ document.getElementById("volumeSlider").addEventListener("input", function () {
 });
 
 window.addEventListener("pagehide", () => {
-    if (!dataAlreadySent) {
-        submitDataToServer();
-        dataAlreadySent = true;
-    }
+    submitDataToServer();
 });
 
 function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
