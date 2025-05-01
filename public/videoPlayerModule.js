@@ -103,6 +103,12 @@ function generateUserId() {
 const uid = generateUserId();  // Call only ONCE at the start
 
 function submitDataToServer() {
+    if (dataAlreadySent) {
+        console.warn("⏹️ Prevented duplicate submission");
+        return;
+    }
+    dataAlreadySent = true;
+    
     const orderedVideos = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
 
     for (const video of orderedVideos) {
