@@ -1,18 +1,27 @@
 const UserView = require('../models/userViewModel');
+const SubmissionLog = require('../models/submissionLogModel');  // ✅ new line
 const mongoose = require('mongoose');
 
 const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
 
-    const { userId: uid, video, chunkViews, quizCorrect: correctAnswers } = req.body;
+    const { userId: uid, video, chunkViews, quizCorrect: correctAnswers, timestamp } = req.body;
 
-    if (!uid || !video || typeof chunkViews !== 'object') {
-      console.warn("⚠️ Invalid payload:", { uid, video, chunkViews });
+    if (!uid || !video || typeof chunkViews !== 'object' || !timestamp) {
+      console.warn("⚠️ Invalid payload:", { uid, video, chunkViews, timestamp });
       return res.status(400).send("Invalid request body");
     }
 
-    // Always convert chunkViews into a Map and check actual views
+    // ✅ Deduplication: skip if already submitted
+    const submissionId = `${uid}_${video}_${timestamp}`;
+    const existingSubmission = await SubmissionLog.findOne({ submissionId });
+    if (existingSubmission) {
+      console.warn("⚠️ Duplicate submission ignored:", submissionId);
+      return res.status(200).send("Duplicate submission ignored");
+    }
+    await SubmissionLog.create({ submissionId });  // ✅ record it
+
     const chunks = Object.entries(chunkViews || {})
       .filter(([_, count]) => count > 0)
       .reduce((acc, [chunk, count]) => {
@@ -20,7 +29,6 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
-    // Only skip if both views are empty AND correctAnswers is not a number
     if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
       console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
@@ -38,9 +46,9 @@ const recordView = async (req, res) => {
             correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
           }]
         });
-    
+
         user = await UserView.findOne({ uid });
-    
+
       } catch (err) {
         if (err.code === 11000) {
           user = await UserView.findOne({ uid });
