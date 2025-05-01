@@ -17,6 +17,14 @@ let dataAlreadySent = false;
 let quizAnswers = {}; // Store user's selected answers
 
 function initializeTracking() {
+    if (video.readyState >= 1) {
+        setupChunks();
+    } else {
+        video.onloadedmetadata = setupChunks;
+    }
+}
+
+function setupChunks() {
     let numChunks = Math.ceil(video.duration / chunkSize);
     if (!chunkViews[currentVideo]) {
         chunkViews[currentVideo] = {};
