@@ -38,10 +38,11 @@ const recordView = async (req, res) => {
             correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
           }]
         });
+    
         user = await UserView.findOne({ uid });
+    
       } catch (err) {
         if (err.code === 11000) {
-          console.warn("⚠️ Duplicate UID encountered, retrying update...");
           user = await UserView.findOne({ uid });
         } else {
           throw err;
@@ -65,8 +66,6 @@ const recordView = async (req, res) => {
         if (typeof correctAnswers === 'number') {
           existingView.correctAnswers = correctAnswers;
         }
-
-        user.markModified('views');
       } else {
         user.views.push({
           videoId: video,
@@ -75,6 +74,7 @@ const recordView = async (req, res) => {
         });
       }
 
+      user.markModified('views');
       await user.save();
     }
 
