@@ -68,6 +68,7 @@ submitButton.addEventListener("click", () => {
         submitButton.innerText = videoIndex === videoOrder.length - 1 ? "Submit" : "Next";
         submitButton.disabled = false;
         submitButton.style.display = "none"; // Hide until video metadata loads
+        window.scrollTo({ top: 0, behavior: 'auto' });
     } else {
         submitButton.disabled = true;
         submitButton.innerText = "Submitted";
