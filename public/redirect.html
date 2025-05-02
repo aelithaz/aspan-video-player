@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const uid = params.get("uid");
+
+      const dest = "https://aspan-video-player.onrender.com?uid=" + encodeURIComponent(uid);
+      window.open(dest, "_blank");
+    };
+  </script>
+</head>
+<body>
+  <p>Redirecting to the video in a new tab...</p>
+  <p>If nothing happens, <a id="manual" href="#">click here</a>.</p>
+  <script>
+    const uid = new URLSearchParams(window.location.search).get("uid");
+    document.getElementById("manual").href = "https://aspan-video-player.onrender.com?uid=" + encodeURIComponent(uid);
+  </script>
+</body>
+</html>
