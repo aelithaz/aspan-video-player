@@ -16,6 +16,8 @@ let manualSeek = false; // Tracks manual seeking
 let seekWhilePaused = false; // Checks if seeking is done while paused
 let quizAnswers = {}; // Store user's selected answers
 let recordedChunks = {}; // Prevents double counting
+const videoOrder = ["wealthReport.mp4", "genderEquality.mp4", "branding.mp4"];
+let videoIndex = 0;
 
 function initializeTracking() {
     let numChunks = Math.ceil(video.duration / chunkSize);
@@ -45,23 +47,32 @@ video.onloadedmetadata = () => {
         firstLoad = false;
     }
 
-    // Show submit button only for the third video
-    if (currentVideo === "branding.mp4") {
-        submitButton.style.display = "inline-block";
-        submitButton.disabled = false;
-        submitButton.innerText = "Submit";
-    } else {
-        submitButton.style.display = "none";
-    }
+    submitButton.style.display = "inline-block";
+    submitButton.disabled = false;
+    submitButton.innerText = videoIndex === videoOrder.length - 1 ? "Submit" : "Next";
 };
 
 submitButton.addEventListener("click", () => {
     if (submitButton.disabled) return;
 
-    submitButton.disabled = true;
-    submitButton.innerText = "Submitted";
+    if (videoIndex < videoOrder.length - 1) {
+        submitDataToServer(); // Save current section
+        videoIndex++;
+        currentVideo = videoOrder[videoIndex];
+        videoSource.src = "videos/" + currentVideo;
+        video.load();
+        lastChunk = -1;
+        video.currentTime = 0;
+        progressBar.style.width = "0%";
 
-    submitDataToServer();
+        submitButton.innerText = videoIndex === videoOrder.length - 1 ? "Submit" : "Next";
+        submitButton.disabled = false;
+        submitButton.style.display = "none"; // Hide until video metadata loads
+    } else {
+        submitButton.disabled = true;
+        submitButton.innerText = "Submitted";
+        submitDataToServer(); // Final submit
+    }
 });
 
 video.ontimeupdate = null;
@@ -279,8 +290,9 @@ function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
 }
 
 window.onload = () => {
+    currentVideo = videoOrder[videoIndex];
     videoSource.src = "videos/" + currentVideo;
-    video.load();  
+    video.load();
 };
 
 export {
