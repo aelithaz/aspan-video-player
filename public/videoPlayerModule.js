@@ -102,8 +102,14 @@ function getPausedChunk() {
 video.addEventListener('pause', () => {
     if (video.ended || !video.duration) return;
     const chunk = getPausedChunk();
-    if (chunk !== null && !(chunk in chunksPaused)) {
-        chunksPaused[chunk] = 1;
+    if (chunk === null) return;
+
+    if (!chunksPaused[currentVideo]) {
+        chunksPaused[currentVideo] = {};
+    }
+
+    if (!(chunk in chunksPaused[currentVideo])) {
+        chunksPaused[currentVideo][chunk] = 1;
     }
 });
 
@@ -177,8 +183,8 @@ function submitDataToServer() {
         const payload = {
             userId: uid,
             video: video,
-            chunkViews: chunkViews[currentVideo],
-            chunksPaused: chunksPaused,
+            chunkViews: chunkViews[video],
+            chunksPaused: chunksPaused[video] || {},
             timestamp: new Date().toISOString(),
             quizCorrect: correctAnswers,
             selectedAnswers: selectedAnswers
@@ -260,9 +266,9 @@ document.getElementById("volumeSlider").addEventListener("input", function () {
 });
 
 // Submit data on tab close
-// window.addEventListener("pagehide", () => {
-//     submitDataToServer();
-// });
+window.addEventListener("pagehide", () => {
+    submitDataToServer();
+});
 
 function handleQuizAnswerWrapper(videoName, questionIndex, answerIndex) {
     handleQuizAnswer(videoName, questionIndex, answerIndex, quizAnswers);
