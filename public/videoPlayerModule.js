@@ -73,6 +73,13 @@ submitButton.addEventListener("click", () => {
         submitButton.disabled = true;
         submitButton.innerText = "Submitted";
         submitDataToServer(); // Final submit
+
+        setTimeout(() => {
+            window.close();
+            if (!window.closed) {
+                alert("You may now close this tab.");
+            }
+        }, 500);
     }
 });
 
