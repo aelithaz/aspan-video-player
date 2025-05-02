@@ -103,7 +103,8 @@ function changeVideo() {
 function generateUserId() {
     let uid = sessionStorage.getItem('uid');
     if (!uid) {
-        uid = Math.random().toString(36).substr(2, 9);
+        const params = new URLSearchParams(window.location.search);
+        uid = params.get('uid') || Math.random().toString(36).substr(2, 9);
         sessionStorage.setItem('uid', uid);
     }
     return uid;
