@@ -90,6 +90,23 @@ function trackChunkViews() {
     trackingInProgress = false;
 }
 
+let chunksPaused = {}; // Tracks unique paused chunks
+
+function getPausedChunk() {
+    if (!video.duration) return null;
+    const totalChunks = Math.ceil(video.duration / chunkSize);
+    const chunk = Math.floor(video.currentTime / chunkSize);
+    return (chunk >= 0 && chunk < totalChunks) ? chunk : null;
+}
+
+video.addEventListener('pause', () => {
+    if (video.ended || !video.duration) return;
+    const chunk = getPausedChunk();
+    if (chunk !== null && !(chunk in chunksPaused)) {
+        chunksPaused[chunk] = 1;
+    }
+});
+
 function changeVideo() {
     currentVideo = videoSelector.value;
     video.pause();
@@ -159,9 +176,10 @@ function submitDataToServer() {
 
         const payload = {
             userId: uid,
-            video: video,
-            chunkViews: videoChunks,
-            timestamp: `${new Date().toISOString()}_${video}_${Math.random().toString(36).substring(2, 6)}`,
+            video: currentVideo,
+            chunkViews: chunkViews[currentVideo],
+            chunksPaused: chunksPaused,
+            timestamp: new Date().toISOString(),
             quizCorrect: correctAnswers,
             selectedAnswers: selectedAnswers
         };

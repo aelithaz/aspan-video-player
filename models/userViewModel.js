@@ -6,6 +6,7 @@ const UserViewSchema = new mongoose.Schema({
         {
             videoId: String,
             chunksViewed: { type: Map, of: Number },
+            chunksPaused: { type: [Number], default: [] },
             correctAnswers: { type: Number, default: 0 }
         }
     ]

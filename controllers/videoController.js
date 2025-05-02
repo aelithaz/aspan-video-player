@@ -6,7 +6,7 @@ const recordView = async (req, res) => {
   try {
     console.log("📥 Received view data:", req.body);
 
-    const { userId: uid, video, chunkViews, quizCorrect: correctAnswers, timestamp } = req.body;
+    const { userId: uid, video, chunkViews, chunksPaused, quizCorrect: correctAnswers, timestamp } = req.body;
 
     if (!uid || !video || typeof chunkViews !== 'object' || !timestamp) {
       console.warn("⚠️ Invalid payload:", { uid, video, chunkViews, timestamp });
@@ -31,6 +31,15 @@ const recordView = async (req, res) => {
         return acc;
       }, {});
 
+    const pausedChunks = Array.isArray(chunksPaused)
+      ? chunksPaused.map(c => parseInt(c)).filter(c => !isNaN(c))
+      : Object.keys(chunksPaused || {}).map(Number);
+
+    const mergeUnique = (existing, incoming) => {
+      const set = new Set([...(existing || []), ...(incoming || [])]);
+      return Array.from(set).sort((a, b) => a - b);
+    };
+
     if (Object.keys(chunks).length === 0 && typeof correctAnswers !== 'number') {
       console.log("⚠️ No chunks or quiz data — skipping DB update");
       return res.status(204).send("No meaningful data to record");
@@ -49,6 +58,7 @@ const recordView = async (req, res) => {
           views: [{
             videoId: video,
             chunksViewed: new Map(Object.entries(chunks)),
+            chunksPaused: pausedChunks,
             correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
           }]
         });
@@ -74,10 +84,15 @@ const recordView = async (req, res) => {
 
         for (const [chunk, count] of Object.entries(chunks)) {
           const prevCount = existingView.chunksViewed.get(chunk) || 0;
-          // Only update if the new count is higher
           if (count > prevCount) {
             existingView.chunksViewed.set(chunk, count);
           }
+        }
+
+        if (Array.isArray(existingView.chunksPaused)) {
+          existingView.chunksPaused = mergeUnique(existingView.chunksPaused, pausedChunks);
+        } else {
+          existingView.chunksPaused = pausedChunks;
         }
 
         if (typeof correctAnswers === 'number') {
@@ -87,6 +102,7 @@ const recordView = async (req, res) => {
         user.views.push({
           videoId: video,
           chunksViewed: new Map(Object.entries(chunks)),
+          chunksPaused: pausedChunks,
           correctAnswers: typeof correctAnswers === 'number' ? correctAnswers : 0
         });
       }
