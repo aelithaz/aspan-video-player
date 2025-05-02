@@ -176,7 +176,7 @@ function submitDataToServer() {
 
         const payload = {
             userId: uid,
-            video: currentVideo,
+            video: video,
             chunkViews: chunkViews[currentVideo],
             chunksPaused: chunksPaused,
             timestamp: new Date().toISOString(),
