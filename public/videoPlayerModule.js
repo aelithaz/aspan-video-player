@@ -114,13 +114,17 @@ video.addEventListener('pause', () => {
 });
 
 function changeVideo() {
-    currentVideo = videoSelector.value;
-    video.pause();
-    videoSource.src = "videos/" + currentVideo;
-    video.load();
-    lastChunk = -1; // Reset chunk tracking
-    video.currentTime = 0;
-    progressBar.style.width = "0%";
+    submitDataToServer();
+    //delay ensures beacon sends
+    setTimeout(() => {
+        currentVideo = videoSelector.value;
+        video.pause();
+        videoSource.src = "videos/" + currentVideo;
+        video.load();
+        lastChunk = -1; // Reset chunk tracking
+        video.currentTime = 0;
+        progressBar.style.width = "0%";
+    }, 100);
 }
 
 function generateUserId() {
